@@ -1,0 +1,19 @@
+[
+  {"start": "0:00", "end": "0:11", "text": "Quantum Headache  ·  Antenna Tilt with a 12-qubit QAOA  ·  QUBIT 2026"},
+  {"start": "0:11", "end": "0:37", "text": "6 real Tel Aviv antennas  ·  4 tilt levels each  ·  4096 plans  ·  classical optimum −2.844"},
+  {"start": "0:37", "end": "1:10", "text": "2 qubits per antenna  →  73-term, 2-local cost Hamiltonian  →  only RZ + CX gates"},
+  {"start": "1:10", "end": "1:21", "text": "The circuit Classiq synthesised: 12 qubits  ·  depth 59  ·  92 CX + 72 RZ"},
+  {"start": "1:21", "end": "1:39", "text": "Live demo: building the QAOA on Classiq  ·  warm-start angles from Wolfram  ·  synthesis in 6.3 s"},
+  {"start": "1:39", "end": "1:57", "text": "Classiq platform: synthesising the quantum program"},
+  {"start": "1:57", "end": "2:22", "text": "The synthesised circuit on Classiq: cost layer (RZ + CX) then mixer layer (RX)"},
+  {"start": "2:22", "end": "2:44", "text": "Wolfram exact simulation finds the QAOA angles (γ, β) = (0.065, 1.129)"},
+  {"start": "2:44", "end": "3:02", "text": "P(better than baseline):  2.4 % random  →  53 % QAOA p=1  →  67 % QAOA p=2"},
+  {"start": "3:02", "end": "3:27", "text": "Classiq job: 4096 shots over 716 distinct plans  ·  best sample = the optimum (−2.844)"},
+  {"start": "3:27", "end": "3:46", "text": "Classiq simulator, 4096 shots: expected cost 2.02 vs Wolfram 2.00"},
+  {"start": "3:46", "end": "3:53", "text": "Demo: the QAOA distribution sharpening toward the optimum"},
+  {"start": "3:53", "end": "4:13", "text": "20 COBYLA iterations on Classiq: warm start from Wolfram beats blind search on the plateau"},
+  {"start": "4:13", "end": "4:28", "text": "Lean 4 + Mathlib: optimum, uniqueness and encoding machine-checked  ·  0 sorry"},
+  {"start": "4:28", "end": "4:39", "text": "Scaling: 10 tilt levels → 4 qubits/antenna → 24 qubits, Hamiltonian stays 2-local"},
+  {"start": "4:39", "end": "4:52", "text": "Whole network: k-means groups → one QAOA job per group → refine where it pays"},
+  {"start": "4:52", "end": "5:10", "text": "Everything reproducible from the group folder  ·  Team Quantum Headache"}
+]
