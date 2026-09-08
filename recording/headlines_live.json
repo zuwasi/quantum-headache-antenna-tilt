@@ -1,0 +1,6 @@
+[
+  {"start": "0:00", "end": "0:18", "text": "Live demo: building the 12-qubit QAOA on Classiq  ·  warm-start angles from Wolfram  ·  synthesis in 6.3 s"},
+  {"start": "0:18", "end": "0:36", "text": "Classiq platform: synthesising the quantum program  ·  depth 59  ·  92 CX + 72 RZ"},
+  {"start": "0:36", "end": "0:54", "text": "The synthesised circuit on Classiq: cost layer (RZ + CX) then mixer layer (RX)"},
+  {"start": "0:54", "end": "1:16", "text": "Classiq job: 4096 shots over 716 distinct plans  ·  best sample = the optimum (−2.844)"}
+]

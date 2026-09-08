@@ -46,6 +46,9 @@ YouTube: https://youtu.be/OSEtTWnRQhc
 `recording\demo_final.mp4` — 5:09 silent screen recording of the deck + live Classiq run, with timed headline banners
 (`recording\raw_take.mp4` is the untouched take; `headlines.json` + `add_headlines.py raw_take.mp4 demo_final.mp4 --start 6` rebuilds the final).
 
+`recording\live_runs.mp4` — 1:16 cut of only the live Classiq run (terminal → synthesis → circuit viewer → jobs page), for embedding in the slides
+(`make_live_cut.ps1` then `add_headlines.py live_take.mp4 live_runs.mp4 --headlines headlines_live.json`).
+
 ## License
 
 MIT — see `LICENSE`.
