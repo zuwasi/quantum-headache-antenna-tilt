@@ -41,6 +41,8 @@ Recording kit: `recording\RECORDING_SCRIPT.md` (shot list), `recording\demo_run.
 
 ## Demo video
 
+YouTube: https://youtu.be/OSEtTWnRQhc
+
 `recording\demo_final.mp4` — 5:09 silent screen recording of the deck + live Classiq run, with timed headline banners
 (`recording\raw_take.mp4` is the untouched take; `headlines.json` + `add_headlines.py raw_take.mp4 demo_final.mp4 --start 6` rebuilds the final).
 

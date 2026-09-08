@@ -281,6 +281,12 @@ function caption(s, text, x, y, w) {
   ];
   s.addTable(rows.map((r, i) => r.map((c) => ({ text: c, options: { bold: i === 0, color: i === 0 ? C.accent2 : C.ink, fill: { color: i === 0 ? C.panel : C.bg }, fontFace: i === 0 ? FONT : 'Consolas', fontSize: i === 0 ? 12 : 11 } }))),
     { x: 0.6, y: 1.6, w: 12.3, colW: [3.3, 6.0, 3.0], border: { type: 'solid', pt: 0.5, color: '2A3358' }, margin: 0.06 });
+  s.addText([
+    { text: 'Demo video: ', options: { color: C.muted } },
+    { text: 'youtu.be/OSEtTWnRQhc', options: { color: C.accent2, hyperlink: { url: 'https://youtu.be/OSEtTWnRQhc' } } },
+    { text: '     Code: ', options: { color: C.muted } },
+    { text: 'github.com/zuwasi/quantum-headache-antenna-tilt', options: { color: C.accent2, hyperlink: { url: 'https://github.com/zuwasi/quantum-headache-antenna-tilt' } } },
+  ], { x: 0.6, y: 5.55, w: 12.3, h: 0.4, fontFace: FONT, fontSize: 16, margin: 0 });
   s.addText('Team Quantum Headache — thank you. Questions?', { x: 0.6, y: 6.2, w: 12.3, h: 0.5, fontFace: FONT, fontSize: 22, bold: true, color: C.ink, margin: 0 });
   s.addNotes('4:55–5:00. Close: everything is reproducible from the group folder with wolframscript, python and lake. Thank you.');
 }
