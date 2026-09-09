@@ -1,4 +1,4 @@
-// Builds QuantumHeadache_AntennaTilt.pptx (5-minute hackathon pitch, 13 slides, merged with the group deck).
+// Builds QuantumHeadache_AntennaTilt.pptx (5-minute hackathon pitch, 14 slides, merged with the group deck).
 // Run: powershell -ExecutionPolicy Bypass -File "$HOME\.agents\skills\working-with-pptx\scripts\run-pptx-node.ps1" C:\Projects\Hackton\group\presentation\build_deck.js
 const pptxgen = require('pptxgenjs');
 const path = require('path');
@@ -17,7 +17,7 @@ pptx.layout = 'LAYOUT_WIDE'; // 13.33 x 7.5 in
 pptx.author = 'Team Quantum Headache';
 pptx.title = 'Antenna Tilt with QAOA — QUBIT 2026';
 
-const TOTAL = 13;
+const TOTAL = 14;
 let slideNo = 0;
 function numberSlide(s) {
   slideNo += 1;
@@ -279,7 +279,36 @@ function caption(s, text, x, y, w) {
   s.addNotes('Both encodings were tried by the team. The 5-qubit pack of 27 configurations leaves 5 invalid states; QAOA learns to avoid them but gives no amplification of the optimum (0.5 to 1.2 times uniform). Two qubits per sector has no invalid states, a 2-local Hamiltonian, 27 times amplification at p = 1, and extends to 10 levels with 4 qubits per sector.');
 }
 
-// ---------- 13. Benchmark (group) + close ----------
+// ---------- 13. Why quantum at 1000 qubits ----------
+{
+  const s = base('Why quantum: what changes at 1000 qubits (500 antennas)', 'Scale');
+  stat(s, 0.6, 1.6, 3.95, '2¹⁰⁰⁰ ≈ 10³⁰¹', 'plans for 500 antennas × 4 tilts (today: 4096)', C.accent2);
+  stat(s, 4.7, 1.6, 3.95, '≈ 45 qubits', 'ceiling of exact statevector simulation: 50 q = 18 PB > Frontier 9 PB', C.warn);
+  stat(s, 8.8, 1.6, 4.1, '≈ 13 000 CX', 'one QAOA layer at 1000 q: 2-local, local coupling, depth ~10²', C.accent2);
+  const panel = (x, head, items, color) => {
+    s.addShape(pptx.ShapeType.roundRect, { x, y: 3.1, w: 6.05, h: 2.95, fill: { color: C.panel }, line: { color: C.panel }, rectRadius: 0.08 });
+    s.addText(head, { x: x + 0.15, y: 3.15, w: 5.8, h: 0.35, fontFace: FONT, fontSize: 14, bold: true, color, margin: 0 });
+    bullets(s, items, { x: x + 0.1, y: 3.5, w: 5.9, h: 2.5, fontSize: 11 });
+  };
+  panel(0.6, 'Best non-quantum tools on this size', [
+    'Brute force (our exact check today): 10³⁰¹ plans at 10¹⁸ / s (exascale) = 10²⁸³ s; the universe is 4×10¹⁷ s old',
+    'Exact simulation of the quantum algorithm (Wolfram / Classiq simulator): memory 2ⁿ × 16 B, 45 q = 0.5 PB, 50 q = 18 PB. Nobody can simulate QAOA past ≈ 48 qubits',
+    'Exact QUBO solvers (branch & bound, Gurobi): sparse 1000-variable instances run hours to days and may never certify the optimum',
+    'Heuristics (simulated annealing, tabu, D-Wave 4 400-qubit annealer): minutes, good plan, no guarantee. This is the real competitor (1.833 vs 1.838 on the toy benchmark)',
+  ], C.red);
+  panel(6.85, 'A real 1000-qubit gate-based quantum computer', [
+    'Physical qubits exist (Sep 2026): IBM Condor 1 121, Atom Computing 1 200, Infleqtion 1 600; best 2-qubit fidelity 99.92% (Quantinuum Helios, 98 q)',
+    '13 000 CX at 99.9% = ≈ 13 errors per shot, so the run must be error-corrected: 1000 logical qubits = 2 000 (2:1 colour code) to 100 000 (surface code) physical. Record today: 96 logical (QuEra). Roadmaps: 2028–2030',
+    'Runtime once available: depth ~10² per layer, 1 shot ≈ 0.1 ms (superconducting) to 10 ms (ions); 10⁴ shots × 20 iterations = seconds to minutes; Wolfram warm start cuts the iterations',
+    'Same Qmod program: Classiq synthesises for the target, simulator today, hardware backend tomorrow. No code change but the backend',
+  ], C.accent2);
+  s.addShape(pptx.ShapeType.roundRect, { x: 0.6, y: 6.15, w: 10.6, h: 0.75, fill: { color: C.accent }, line: { color: C.accent }, rectRadius: 0.06 });
+  s.addText('Classical tools give a good plan and stop there. At 12 qubits we measured 27× amplification and P(cost<0) 2.4% → 53% → 67% with p; whether that persists at 1000 qubits cannot be checked classically. The only instrument that can run the algorithm at this size is the quantum computer itself.',
+    { x: 0.7, y: 6.15, w: 10.4, h: 0.75, fontFace: FONT, fontSize: 11, color: C.ink, valign: 'middle', margin: 0.03 });
+  s.addNotes('Scale slide. 1000 qubits is 500 antennas at 4 tilt levels or 250 at 10 levels. Brute force and exact simulation of the quantum algorithm are impossible past about 45 to 48 qubits; exact QUBO solvers stall; heuristics such as annealing are the real classical competitor and give good but unproven plans. Physical 1000-qubit machines exist today but gate errors mean the 13 000-CX layer needs error correction, so 1000 logical qubits is a 2028 to 2030 machine. Once available, a run is seconds to minutes, and the Qmod program is unchanged apart from the backend.');
+}
+
+// ---------- 14. Benchmark (group) + close ----------
 {
   const s = base('Benchmark: 84% of the ceiling with 4.8× fewer quantum jobs', 'Benchmark');
   s.addImage({ path: img('charts/group_benchmark_bars.png'), x: 0.6, y: 1.55, w: 6.0, h: 2.97 });
