@@ -1,4 +1,4 @@
-// Builds QuantumHeadache_AntennaTilt.pptx (5-minute hackathon pitch, 12 slides).
+// Builds QuantumHeadache_AntennaTilt.pptx (5-minute hackathon pitch, 13 slides, merged with the group deck).
 // Run: powershell -ExecutionPolicy Bypass -File "$HOME\.agents\skills\working-with-pptx\scripts\run-pptx-node.ps1" C:\Projects\Hackton\group\presentation\build_deck.js
 const pptxgen = require('pptxgenjs');
 const path = require('path');
@@ -54,16 +54,74 @@ function caption(s, text, x, y, w) {
   s.background = { color: C.bg };
   s.addShape(pptx.ShapeType.rect, { x: 0, y: 0, w: 13.33, h: 0.25, fill: { color: C.accent } });
   s.addText('QUBIT 2026 HACKATHON · CHALLENGE: ANTENNA TILT', { x: 0.8, y: 1.6, w: 11.5, h: 0.4, fontFace: FONT, fontSize: 14, color: C.accent2, bold: true, charSpacing: 3, margin: 0 });
-  s.addText('Tilting 6 Tel Aviv antennas\nwith a 12-qubit QAOA', { x: 0.8, y: 2.1, w: 11.5, h: 2.0, fontFace: FONT, fontSize: 48, bold: true, color: C.ink, margin: 0 });
+  s.addText('Tilting a city\'s antennas:\nk-means groups + a 12-qubit QAOA leaf', { x: 0.8, y: 2.1, w: 11.5, h: 2.0, fontFace: FONT, fontSize: 48, bold: true, color: C.ink, margin: 0 });
   s.addText('Real OpenCelliD data → cost Hamiltonian → Classiq circuit → Wolfram exact simulation → Lean 4 proof', { x: 0.8, y: 4.2, w: 11.5, h: 0.6, fontFace: FONT, fontSize: 18, color: C.muted, margin: 0 });
   s.addText('Team Quantum Headache', { x: 0.8, y: 5.6, w: 6, h: 0.5, fontFace: FONT, fontSize: 20, bold: true, color: C.ink, margin: 0 });
   s.addText('5-minute demo · September 2026', { x: 0.8, y: 6.05, w: 6, h: 0.4, fontFace: FONT, fontSize: 14, color: C.muted, margin: 0 });
   s.addNotes('0:00–0:20. One sentence: we optimise the down-tilt of 6 real Tel Aviv sector antennas with QAOA, ran it on Classiq, and verified every number two independent ways. Everything shown is reproducible from the group folder.');
 }
 
-// ---------- 2. Problem ----------
+// ---------- 2. Motivation (group) ----------
 {
-  const s = base('The problem: pick one down-tilt per antenna', 'Problem');
+  const s = base('From a city of users to interaction regions and one utility U', 'Motivation');
+  s.addImage({ path: img('charts/group_interaction_region.png'), x: 0.6, y: 1.55, w: 4.7, h: 4.85 });
+  caption(s, 'Toy model: hexagonal cells, 120° sectors. The green hexagon is one interaction region R: three sectors from three sites that overlap.', 0.6, 6.45, 4.9);
+  s.addShape(pptx.ShapeType.roundRect, { x: 5.7, y: 1.6, w: 7.2, h: 1.95, fill: { color: C.panel }, line: { color: C.panel }, rectRadius: 0.08 });
+  s.addText([
+    { text: 'U(t) = α·Q(t) − β·I(t) − γ·D(t)', options: { fontSize: 22, bold: true, color: C.accent2, breakLine: true } },
+    { text: 'Q reception quality · I interference · D unmet demand (dead zones) — each summed over users, weighted by demand w_p', options: { fontSize: 13, color: C.ink, breakLine: true } },
+    { text: 'Our leaf cost is −U with α = 1.5 (coverage c·t), β = 1 (tᵀ I t), γ = 0.3 (tilt penalty Σt)', options: { fontSize: 13, color: C.muted } },
+  ], { x: 5.9, y: 1.7, w: 6.8, h: 1.75, fontFace: FONT, valign: 'middle', margin: 0.05 });
+  bullets(s, [
+    'The operator has spatial demand data: where the users are, where the dead zones are',
+    'Each sector antenna gets one down-tilt; tilting down cuts interference on neighbours but shrinks coverage',
+    'Every interaction region has its own optimum, and a city has thousands of regions',
+    'Two ways to fail: one plan for the whole network (too coarse) or one job per region (too many jobs) → the hierarchy on the next slide',
+  ], { x: 5.7, y: 3.75, w: 7.2, h: 2.7, fontSize: 14 });
+  s.addNotes('Motivation from the group deck: customers, hexagonal cells with three 120-degree sectors, the interaction region R where three sectors overlap, and the demand-weighted utility U. Our real-data cost function is the same form with fixed weights.');
+}
+
+// ---------- 3. Pipeline (group) ----------
+{
+  const s = base('Whole network: k-means groups, one QAOA job per group', 'Architecture');
+  s.addImage({ path: img('charts/group_kmeans_grid.png'), x: 0.6, y: 1.55, w: 4.3, h: 3.9 });
+  caption(s, 'k-means (k = 5) on the toy network: 48 regions, 5 colours = 5 groups = 5 QAOA jobs.', 0.6, 5.5, 4.4);
+  const step = (x, y, n, head, body) => {
+    s.addShape(pptx.ShapeType.roundRect, { x, y, w: 2.3, h: 1.15, fill: { color: C.panel }, line: { color: C.panel }, rectRadius: 0.06 });
+    s.addText([
+      { text: n + '  ' + head, options: { bold: true, color: C.accent2, fontSize: 12, breakLine: true } },
+      { text: body, options: { color: C.ink, fontSize: 10.5 } },
+    ], { x: x + 0.08, y, w: 2.14, h: 1.15, fontFace: FONT, valign: 'middle', margin: 0.03 });
+  };
+  const arrow = (x, y, w, h, atBegin) => s.addShape(pptx.ShapeType.line, { x, y, w, h, line: { color: C.accent2, width: 1.5, ...(atBegin ? { beginArrowType: 'triangle' } : { endArrowType: 'triangle' }) } });
+  const X = [5.3, 7.95, 10.6];
+  step(X[0], 1.6, '1', 'Network data', 'users, demand, dead zones → feature vector x_r per region');
+  step(X[1], 1.6, '2', 'k-means, k = 5', 'regions with similar x_r share one group G_1 … G_5');
+  step(X[2], 1.6, '3', 'Group utility U_j', 'aggregate demand per group → one cost Hamiltonian H_C per group');
+  step(X[2], 3.1, '4', 'QAOA on Classiq', '2 qubits per sector, angles warm-started from Wolfram (our leaf, next slides)');
+  step(X[1], 3.1, '5', 'Assign + evaluate', 'argmin plan to every region of the group; compute global U');
+  step(X[0], 3.1, '6', 'Refine', 're-cluster the group with the most variation; stop when ΔU ≈ 0');
+  arrow(X[0] + 2.3, 2.175, 0.35, 0.001);        // 1 -> 2
+  arrow(X[1] + 2.3, 2.175, 0.35, 0.001);        // 2 -> 3
+  arrow(X[2] + 1.15, 2.75, 0.001, 0.35);        // 3 -> 4 (down)
+  arrow(X[1] + 2.3, 3.675, 0.35, 0.001, true);  // 4 -> 5 (left)
+  arrow(X[0] + 2.3, 3.675, 0.35, 0.001, true);  // 5 -> 6 (left)
+  arrow(X[0] + 1.15, 2.75, 0.001, 0.35, true);  // 6 -> 1 (up)
+  s.addShape(pptx.ShapeType.roundRect, { x: 5.3, y: 4.5, w: 7.6, h: 1.35, fill: { color: C.panel }, line: { color: C.panel }, rectRadius: 0.08 });
+  s.addText([
+    { text: 'Two stated assumptions', options: { bold: true, color: C.accent2, fontSize: 13, breakLine: true } },
+    { text: '1. Regions in one group are similar enough to share a coarse plan — step 6 relaxes this level by level (5 → 25 → 125 groups).', options: { fontSize: 11.5, breakLine: true } },
+    { text: '2. Interference between groups is ignored at each level — fixed by re-optimising boundary antennas with neighbours held fixed.', options: { fontSize: 11.5 } },
+  ], { x: 5.45, y: 4.55, w: 7.3, h: 1.25, fontFace: FONT, color: C.ink, valign: 'top', margin: 0.05 });
+  s.addShape(pptx.ShapeType.roundRect, { x: 0.6, y: 6.0, w: 12.3, h: 0.55, fill: { color: C.accent }, line: { color: C.accent }, rectRadius: 0.06 });
+  s.addText('Quantum work only where resolution is needed: ≤ 25 jobs per level = two batches of 15 parallel Classiq jobs. Classical: k-means + aggregation. Quantum: one warm-started QAOA per group.',
+    { x: 0.7, y: 6.0, w: 12.1, h: 0.55, fontFace: FONT, fontSize: 11.5, color: C.ink, valign: 'middle', margin: 0.03 });
+  s.addNotes('The whole-network architecture from the group: cluster regions by a classical feature vector, one QAOA job per group, assign the plan to all regions in the group, evaluate global utility, then re-cluster only the group with the most variation. Our 12-qubit real-data run is the leaf solver in step 4. Two assumptions are stated explicitly.');
+}
+
+// ---------- 4. Leaf problem ----------
+{
+  const s = base('One leaf of the tree: 6 real Tel Aviv antennas, one down-tilt each', 'Leaf problem');
   s.addImage({ path: img('charts/map_small.jpg'), x: 0.6, y: 1.55, w: 7.6, h: 3.83 });
   caption(s, 'Two real 3-sector sites from OpenCelliD (Ayalon, Tel Aviv). Left: all tilts 0. Right: optimum plan — only A1 tilts to level 3.', 0.6, 5.42, 7.6);
   bullets(s, [
@@ -76,7 +134,7 @@ function caption(s, text, x, y, w) {
   s.addNotes('0:20–1:00. Data: opencellid_il2.csv, two 3-sector sites, interference matrix from geometry. 4096 plans is small on purpose: it lets us check the quantum answer exactly. The real operator problem (hundreds of antennas, 10 levels) has no exact classical check — that is where QAOA is meant to go.');
 }
 
-// ---------- 3. Encoding ----------
+// ---------- 5. Encoding ----------
 {
   const s = base('Encoding: 2 qubits per antenna, 12 qubits total', 'Model');
   s.addShape(pptx.ShapeType.roundRect, { x: 0.6, y: 1.6, w: 6.0, h: 2.35, fill: { color: C.panel }, line: { color: C.panel }, rectRadius: 0.08 });
@@ -99,7 +157,7 @@ function caption(s, text, x, y, w) {
   s.addNotes('1:00–1:40. Each antenna is a 2-bit number. Substituting q=(1−Z)/2 into the quadratic cost gives a Hamiltonian with only Z and ZZ terms — 73 in total, computed by gates/pauli_decomposition.py and checked against the full cost table. 2-local means the phase layer is 72 RZ rotations and CX ladders; no expensive multi-controlled gates.');
 }
 
-// ---------- 4. Circuit ----------
+// ---------- 6. Circuit ----------
 {
   const s = base('The circuit Classiq synthesised', 'Gates');
   s.addImage({ path: img('charts/circuit_stats.png'), x: 0.6, y: 1.55, w: 7.4, h: 3.89 });
@@ -115,7 +173,7 @@ function caption(s, text, x, y, w) {
   s.addNotes('1:40–2:10. The Qmod program uses Classiq\'s phase() on a QNum arithmetic expression, so the compiler builds the ZZ ladder for us. Transpiled: 12 qubits, depth 59 for one layer. We exported QASM3 and cross-checked a hand-written QASM2 of the same layer with Qiskit — three engines, same expectation value.');
 }
 
-// ---------- 5. Wolfram ----------
+// ---------- 7. Wolfram ----------
 {
   const s = base('Wolfram exact simulation: where the good angles are', 'Simulation');
   s.addImage({ path: img('wolfram/img/landscape.png'), x: 0.6, y: 1.55, w: 5.3, h: 5.05 });
@@ -133,37 +191,23 @@ function caption(s, text, x, y, w) {
   s.addNotes('2:10–2:50. Wolfram lets us do the full 4096-dimensional statevector and scan the whole (γ,β) plane. The optimum is a narrow valley; most of the plane is a plateau — that will matter on Classiq. These optimal angles are exported to JSON and used as warm start in the Classiq run.');
 }
 
-// ---------- 6. Quantum gain ----------
+// ---------- 8. Quantum gain + Classiq ----------
 {
-  const s = base('What the quantum sampler buys us', 'Result');
-  s.addImage({ path: img('charts/quantum_gain.png'), x: 0.6, y: 1.55, w: 6.2, h: 3.49 });
-  s.addImage({ path: img('wolfram/img/shots.png'), x: 6.95, y: 1.55, w: 5.95, h: 2.85 });
-  caption(s, 'Shots needed for 95% chance of sampling the exact optimum (Wolfram).', 6.95, 4.42, 5.95);
-  stat(s, 0.6, 5.2, 2.9, '2.4% → 67%', 'P(cost < 0), random → p = 2', C.accent2);
-  stat(s, 3.65, 5.2, 2.9, '12270 → 342', 'shots to hit optimum (95%)', C.accent2);
+  const s = base('What the quantum sampler buys us, and Classiq reproduces it', 'Result');
+  s.addImage({ path: img('charts/quantum_gain.png'), x: 0.6, y: 1.55, w: 6.0, h: 3.38 });
+  s.addImage({ path: img('charts/wolfram_vs_classiq.png'), x: 6.9, y: 1.55, w: 6.0, h: 2.45 });
   bullets(s, [
-    'Half of all samples at p = 1 and two-thirds at p = 2 are already better than the baseline',
-    'Only 1–2 QAOA layers; more layers or larger p continue to sharpen the distribution',
-  ], { x: 6.95, y: 5.2, w: 5.95, h: 1.4, fontSize: 13 });
-  s.addNotes('2:50–3:20. The headline: a random plan is better than baseline 2.4% of the time; after one QAOA layer 53%; after two, 67%. The expected number of shots to see the exact optimum drops from over 12 000 to about 340. That is the gain, measured on the exact statevector and reproduced in shots on Classiq.');
+    'Best sampled bitstring in every Classiq run = the classical optimum (0,3,0,0,0,0)',
+    'p = 2: ⟨C⟩ = −0.466 sampled vs −0.383 exact; 716 distinct plans in 4096 shots',
+  ], { x: 6.9, y: 4.1, w: 6.0, h: 0.9, fontSize: 12.5 });
+  stat(s, 0.6, 5.1, 2.95, '2.4% → 67%', 'P(cost < 0): random → p = 2', C.accent2);
+  stat(s, 3.7, 5.1, 2.95, '12270 → 342', 'shots for 95% chance of the optimum', C.accent2);
+  stat(s, 6.8, 5.1, 2.95, '2.020 vs 1.999', '⟨C⟩ p = 1: Classiq 4096 shots vs exact', C.warn);
+  stat(s, 9.9, 5.1, 2.95, '0.529 vs 0.530', 'P(cost < 0) p = 1: Classiq vs exact', C.warn);
+  s.addNotes('Headline: a random plan beats the baseline 2.4 percent of the time; after one QAOA layer 53 percent; after two, 67 percent. Shots to see the exact optimum drop from over 12 000 to about 340. The Classiq simulator reproduces the exact Wolfram numbers within shot noise, and the most frequent low-cost sample is exactly the optimum.');
 }
 
-// ---------- 7. Classiq run ----------
-{
-  const s = base('Same numbers from the Classiq simulator', 'Classiq');
-  s.addImage({ path: img('charts/wolfram_vs_classiq.png'), x: 0.6, y: 1.55, w: 8.0, h: 3.27 });
-  stat(s, 8.9, 1.6, 4.0, '2.0203 vs 1.9985', '⟨C⟩ p = 1, 4096 shots vs exact', C.accent2);
-  stat(s, 8.9, 3.15, 4.0, '0.529 vs 0.530', 'P(cost < 0), p = 1', C.accent2);
-  bullets(s, [
-    'Best sampled bitstring in every run = the classical optimum (0,3,0,0,0,0)',
-    'p = 2: ⟨C⟩ = −0.466 sampled vs −0.383 exact, P(cost<0) = 0.668 vs 0.67',
-    'Results, QASM and per-iteration traces saved in group/classiq/results/',
-    'Demo video: group/video/qaoa_distribution.mp4 (distribution sharpening as angles ramp)',
-  ], { x: 0.6, y: 5.05, w: 12.3, h: 1.7, fontSize: 13 });
-  s.addNotes('3:20–3:50. Switch to the live Classiq IDE / recorded screen here. Show the synthesised circuit and the histogram. The sampled expectation on the Classiq simulator agrees with Wolfram within shot noise and the most frequent low-cost sample is exactly the optimum.');
-}
-
-// ---------- 8. Video slide ----------
+// ---------- 9. Video slide ----------
 {
   const s = base('Demo: the QAOA distribution sharpening', 'Video');
   s.addMedia({ type: 'video', path: img('video/qaoa_distribution.mp4'), x: 0.6, y: 1.55, w: 8.4, h: 5.0 });
@@ -177,7 +221,7 @@ function caption(s, text, x, y, w) {
   s.addNotes('3:50–4:10. Play the clip (about 5 s). If the video does not play in the imported Canva/Google Slides deck, use the MP4 directly from the group folder.');
 }
 
-// ---------- 9. Optimisation lesson ----------
+// ---------- 10. Optimisation lesson ----------
 {
   const s = base('Optimising on Classiq: warm start beats blind search', 'Classiq');
   const cover = 'data:image/png;base64,' + require('fs').readFileSync(img('charts/classiq_convergence.png')).toString('base64');
@@ -192,7 +236,7 @@ function caption(s, text, x, y, w) {
   s.addNotes('4:10–4:30. Optimising angles on the sampler alone is hard: a random start sits on the plateau and COBYLA cannot see a gradient through shot noise. Warm-starting from the Wolfram angles gives the best result immediately. That is our practical recipe.');
 }
 
-// ---------- 10. Lean ----------
+// ---------- 11. Lean ----------
 {
   const s = base('Lean 4 certificates: the classical facts are machine-checked', 'Proof');
   s.addShape(pptx.ShapeType.roundRect, { x: 0.6, y: 1.6, w: 12.3, h: 3.0, fill: { color: C.panel }, line: { color: C.panel }, rectRadius: 0.08 });
@@ -214,81 +258,45 @@ function caption(s, text, x, y, w) {
   s.addNotes('4:30–4:40. Judges asked for trust: the classical optimum, its uniqueness and the bit encoding are theorems in Lean 4 with Mathlib, checked by kernel decision procedures over all 4096 cases. No sorry.');
 }
 
-// ---------- 11. Scaling ----------
+// ---------- 12. Why 2 qubits per sector (group slide 5 reframed) ----------
 {
-  const s = base('From 4 tilt levels to the operator\'s 10 — and beyond', 'Scale');
-  s.addImage({ path: img('wolfram/img/levels.png'), x: 0.6, y: 1.55, w: 6.6, h: 4.48 });
+  const s = base('Why 2 qubits per sector, not a 5-qubit pack of 27 configurations', 'Design choice');
+  s.addImage({ path: img('charts/group_qaoa5_convergence.png'), x: 0.6, y: 1.55, w: 5.6, h: 3.42 });
+  caption(s, 'Group run, 5-qubit encoding (27 of 32 states valid): ⟨H_C⟩ converges in all 10 groups, but the sampled optimum is no more likely than uniform.', 0.6, 5.0, 5.6);
+  s.addShape(pptx.ShapeType.roundRect, { x: 0.6, y: 5.5, w: 5.6, h: 0.95, fill: { color: C.panel }, line: { color: C.panel }, rectRadius: 0.08 });
+  s.addText('The hierarchy is encoding-agnostic: keep k-means + refinement, swap the leaf solver. The group\'s own next step ("6-qubit encoding, constrained mixer") is this binary encoding — already run on Classiq and proven in Lean.',
+    { x: 0.7, y: 5.5, w: 5.4, h: 0.95, fontFace: FONT, fontSize: 11.5, color: C.ink, valign: 'middle', margin: 0.03 });
+  stat(s, 6.5, 1.6, 3.1, '0.5 – 1.2×', 'P(optimum) / uniform, 5-qubit pack, p = 1, 3, 6', C.red);
+  stat(s, 9.8, 1.6, 3.1, '27×', 'P(optimum) / uniform, 2 qubits per sector, p = 1', C.accent2);
+  stat(s, 6.5, 3.15, 3.1, '15.6% → 3.0%', 'invalid states, 5-qubit pack, uniform → p = 3', C.warn);
+  stat(s, 9.8, 3.15, 3.1, '0%', 'invalid states, binary: every bitstring is a plan', C.accent2);
   bullets(s, [
-    '10 levels → 4 qubits per antenna → 24 qubits for the same 6 antennas',
-    'Hamiltonian stays 2-local: gate count grows quadratically, not exponentially',
-    '100 antennas × 10 levels ≈ 400 qubits — QAOA depth stays p·O(n²)',
-    'Grover alternative: quadratic speed-up, needs a fault-tolerant machine and an oracle for “cost < threshold”; shown on a 16-state slice in the notebook',
-    'Next: run p = 1 on IonQ simulator backend via Classiq, then hardware',
-  ], { x: 7.5, y: 1.6, w: 5.4, h: 4.6, fontSize: 13 });
-  s.addNotes('4:40–4:47. Scaling story: binary encoding grows with log of the level count; the Hamiltonian stays quadratic so the circuit stays shallow. Grover is the long-term alternative but needs error correction.');
+    'Dense pack: 5 penalised states out of 32, so the QAOA layers go into learning the penalty, not the utility',
+    'Circuit cost is not the issue: depth 56 on 5 qubits vs 59 on 12 qubits, RZ + CX in both',
+    'Binary per sector keeps H_C 2-local; P(cost < 0) climbs 53% → 67% from p = 1 to 2',
+    'And it scales: 10 tilt levels = 4 qubits per sector, 24 qubits for 6 sectors, gate count grows quadratically',
+  ], { x: 6.5, y: 4.7, w: 6.4, h: 1.9, fontSize: 12 });
+  s.addNotes('Both encodings were tried by the team. The 5-qubit pack of 27 configurations leaves 5 invalid states; QAOA learns to avoid them but gives no amplification of the optimum (0.5 to 1.2 times uniform). Two qubits per sector has no invalid states, a 2-local Hamiltonian, 27 times amplification at p = 1, and extends to 10 levels with 4 qubits per sector.');
 }
 
-// ---------- 12. Hierarchical scaling ----------
+// ---------- 13. Benchmark (group) + close ----------
 {
-  const s = base('Whole network: coarse-to-fine k-means, one QAOA job per group', 'Architecture');
-  // tree
-  const box = (x, y, w, h, text, fill, size) => {
-    s.addShape(pptx.ShapeType.roundRect, { x, y, w, h, fill: { color: fill }, line: { color: fill }, rectRadius: 0.06 });
-    s.addText(text, { x, y, w, h, fontFace: FONT, fontSize: size || 12, color: C.ink, align: 'center', valign: 'middle', margin: 0.02 });
-  };
-  const line = (x1, y1, x2, y2) => s.addShape(pptx.ShapeType.line, {
-    x: Math.min(x1, x2), y: Math.min(y1, y2), w: Math.abs(x2 - x1), h: Math.abs(y2 - y1),
-    flipH: (x2 - x1) * (y2 - y1) < 0, line: { color: C.muted, width: 1 },
-  });
-  box(2.3, 1.6, 3.4, 0.6, 'Whole network — feature vector x_r per region', C.panel, 12);
-  s.addText('k-means, k = 5', { x: 5.8, y: 1.75, w: 1.6, h: 0.3, fontFace: FONT, fontSize: 10, color: C.accent2, margin: 0 });
-  const gx = [0.6, 2.05, 3.5, 4.95, 6.4];
-  gx.forEach((x, i) => { line(4.0, 2.2, x + 0.5, 2.85); box(x, 2.85, 1.0, 0.5, `G${i + 1}`, i === 0 ? C.accent : C.panel, 13); });
-  s.addText('each group: joint QAOA of its antennas · 2 qubits/antenna · 2-local H_C · one Classiq job (15 in parallel)',
-    { x: 4.3, y: 3.45, w: 3.2, h: 0.5, fontFace: FONT, fontSize: 10, color: C.muted, margin: 0 });
-  s.addText('refine G1 where ΔU is still large', { x: 4.3, y: 4.2, w: 3.2, h: 0.3, fontFace: FONT, fontSize: 10, color: C.accent2, margin: 0 });
-  const cx = [0.6, 1.3, 2.0, 2.7, 3.4];
-  cx.forEach((x, i) => { line(1.1, 3.35, x + 0.3, 4.15); box(x, 4.15, 0.6, 0.45, `G1${i + 1}`, i === 1 ? C.accent : C.panel, 11); });
-  line(1.6, 4.6, 1.6, 5.0);
-  box(0.6, 5.0, 6.9, 0.7, 'our run = one leaf: 2 real sites, 6 sectors, 12 qubits, optimum −2.844 found and proven', C.accent, 12);
-  s.addText('5 → 25 → 125 groups: distinct plans grow, jobs per level ≤ 25 → two batches of 15', { x: 0.6, y: 5.85, w: 6.9, h: 0.3, fontFace: FONT, fontSize: 10.5, color: C.muted, margin: 0 });
-
-  s.addShape(pptx.ShapeType.roundRect, { x: 7.9, y: 1.6, w: 5.0, h: 2.35, fill: { color: C.panel }, line: { color: C.panel }, rectRadius: 0.08 });
+  const s = base('Benchmark: 84% of the ceiling with 4.8× fewer quantum jobs', 'Benchmark');
+  s.addImage({ path: img('charts/group_benchmark_bars.png'), x: 0.6, y: 1.55, w: 6.0, h: 2.97 });
+  s.addImage({ path: img('charts/group_benchmark_depth.png'), x: 6.9, y: 1.55, w: 6.0, h: 3.45 });
+  caption(s, 'Hierarchy + QAOA equals exact-27 and annealing on every group (10 / 10 optimal).', 0.6, 4.55, 6.0);
+  caption(s, 'Refinement 5 → 21 groups; cycle 3 (13 groups) already reaches 1.75 = 95% of the ceiling.', 6.9, 5.02, 6.0);
+  stat(s, 0.6, 5.4, 2.6, '1.379', 'one config for all · 1 job', C.muted);
+  stat(s, 3.35, 5.4, 2.6, '1.547', 'hierarchy + QAOA · 10 jobs', C.accent2);
+  stat(s, 6.1, 5.4, 2.6, '1.838', 'per-region ceiling · 48 jobs', C.warn);
   s.addText([
-    { text: 'Two stated assumptions', options: { bold: true, color: C.accent2, fontSize: 14, breakLine: true } },
-    { text: '1. Regions in one group are similar enough to share the coarse tilt plan — refinement relaxes this level by level.', options: { fontSize: 12, breakLine: true } },
-    { text: '2. Interference between groups is ignored at each level — fixed by re-optimising boundary antennas with neighbours held fixed.', options: { fontSize: 12 } },
-  ], { x: 8.05, y: 1.7, w: 4.7, h: 2.15, fontFace: FONT, color: C.ink, valign: 'top', margin: 0.05 });
-  bullets(s, [
-    'Group = antennas optimised jointly (the coupled ZZ problem) — that is where QAOA does work; a single shared 27-way choice would be brute-forced classically',
-    'Quantum budget per job stays what we ran today: 12 qubits = 6 antennas; 24 qubits = 6 antennas × 10 tilt levels',
-    'Classical: k-means + utility aggregation; quantum: one warm-started QAOA per group',
-  ], { x: 7.9, y: 4.15, w: 5.0, h: 2.4, fontSize: 12 });
-  s.addNotes('4:47–4:55. Whole-network story: cluster regions by a classical feature vector, k=5; each group is one QAOA job optimising its antennas jointly, 2 qubits per antenna; refine only where utility still improves. Our 12-qubit real-data run is one leaf. Two assumptions stated: shared plan within a group, no cross-group interference at a level.');
-}
-
-// ---------- 13. Summary ----------
-{
-  const s = base('Everything is in the group folder — reproducible end to end', 'Summary');
-  const rows = [
-    ['Artifact', 'Path (C:\\Projects\\Hackton\\group\\…)', 'Key number'],
-    ['Classiq QAOA program + results', 'classiq\\qaoa_tilt_classiq.py, classiq\\results\\*.json/*.qasm', '⟨C⟩ 2.020 (p1), −0.466 (p2)'],
-    ['Pauli decomposition + QASM layer', 'gates\\pauli_terms.json, gates\\qaoa_layer_schedule.qasm', '73 terms, 2-local'],
-    ['Wolfram notebook, PDF, CDF, MD', 'wolfram\\wolfram_realdataset_algorithms.*', 'P(cost<0) 0.024→0.53→0.67'],
-    ['Lean 4 proof + build log', 'lean\\TiltQAOA.lean', 'optimum −2.844 unique, 0 sorry'],
-    ['Charts + demo videos', 'charts\\*.png, video\\*.mp4', '120 + 22 frames'],
-    ['Hamiltonian write-up', 'qaoa_antenna_hamiltonian_explanation.md', '—'],
-  ];
-  s.addTable(rows.map((r, i) => r.map((c) => ({ text: c, options: { bold: i === 0, color: i === 0 ? C.accent2 : C.ink, fill: { color: i === 0 ? C.panel : C.bg }, fontFace: i === 0 ? FONT : 'Consolas', fontSize: i === 0 ? 12 : 11 } }))),
-    { x: 0.6, y: 1.6, w: 12.3, colW: [3.3, 6.0, 3.0], border: { type: 'solid', pt: 0.5, color: '2A3358' }, margin: 0.06 });
-  s.addText([
-    { text: 'Demo video: ', options: { color: C.muted } },
+    { text: 'Video: ', options: { color: C.muted } },
     { text: 'youtu.be/OSEtTWnRQhc', options: { color: C.accent2, hyperlink: { url: 'https://youtu.be/OSEtTWnRQhc' } } },
-    { text: '     Code: ', options: { color: C.muted } },
+    { text: '\nCode: ', options: { color: C.muted } },
     { text: 'github.com/zuwasi/quantum-headache-antenna-tilt', options: { color: C.accent2, hyperlink: { url: 'https://github.com/zuwasi/quantum-headache-antenna-tilt' } } },
-  ], { x: 0.6, y: 5.55, w: 12.3, h: 0.4, fontFace: FONT, fontSize: 16, margin: 0 });
-  s.addText('Team Quantum Headache — thank you. Questions?', { x: 0.6, y: 6.2, w: 12.3, h: 0.5, fontFace: FONT, fontSize: 22, bold: true, color: C.ink, margin: 0 });
-  s.addNotes('4:55–5:00. Close: everything is reproducible from the group folder with wolframscript, python and lake. Thank you.');
+    { text: '\nTeam Quantum Headache — thank you. Questions?', options: { color: C.ink, bold: true } },
+  ], { x: 8.95, y: 5.3, w: 3.95, h: 1.3, fontFace: FONT, fontSize: 11.5, valign: 'middle', margin: 0.03 });
+  s.addNotes('Close with the group benchmark: one shared plan scores 1.379, per-region exact search 1.838 with 48 jobs, the hierarchy with QAOA 1.547 with 10 jobs; cycle 3 reaches 95 percent of the ceiling. Everything is reproducible from the GitHub repo; the demo video is on YouTube.');
 }
 
 const out = path.join(G, 'presentation', process.argv[2] || 'QuantumHeadache_AntennaTilt.pptx');

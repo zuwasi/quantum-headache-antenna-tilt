@@ -21,7 +21,7 @@ Everything in this folder is reproducible from `C:\Projects\Hackton`.
 
 | Path | What |
 |---|---|
-| `presentation\QuantumHeadache_AntennaTilt.pptx` (+ `.pdf`) | 13-slide, 5-minute deck (slide 12 = hierarchical k-means → QAOA-per-group scaling architecture) with speaker notes and embedded demo video. Import into Canva (Create → Import file) or Google Slides (File → Import slides). `build_deck.js` regenerates it. |
+| `presentation\QuantumHeadache_AntennaTilt.pptx` (+ `.pdf`) | 13-slide, 5-minute deck merged with the group deck: slides 2-3 motivation + hierarchical k-means / QAOA-per-group pipeline, slides 4-11 the 12-qubit real-data leaf (encoding, Classiq circuit, Wolfram, results, videos, Lean), slide 12 why 2 qubits per sector beats the 5-qubit pack, slide 13 group benchmark (84% of ceiling, 4.8x fewer jobs). Speaker notes and embedded demo videos. Import into Google Slides (File > Import slides) or Canva. `build_deck.js` regenerates it; group visuals are `charts\group_*.png`. |
 | `video\qaoa_distribution.mp4` | Demo clip: QAOA distribution sharpening as angles ramp 0 → p=2 optimum (120 frames, `make_frames.wl`). |
 | `video\classiq_convergence.mp4` | COBYLA trace on the Classiq simulator, iteration by iteration (`make_charts.py`). |
 | `charts\*.png` | `wolfram_vs_classiq`, `quantum_gain`, `classiq_convergence`, `circuit_stats`, `map_small.jpg`. |
